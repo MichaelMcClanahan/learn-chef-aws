@@ -1,5 +1,4 @@
-# This security group allows intra-node communication on all ports with all
-# protocols.
+# Allows intra-node communication on all ports with all protocols.
 resource "aws_security_group" "chef-vpc" {
   name        = "chef-vpc"
   description = "Default security group that allows all instances in the VPC to talk to each other over any port and protocol."
@@ -25,10 +24,10 @@ resource "aws_security_group" "chef-vpc" {
   }
 }
 
-# This security group allows public ingress to the instances for HTTP and HTTPS
+# Allows public ingress to the instances for HTTP and HTTPS.
 resource "aws_security_group" "chef-public-ingress" {
   name        = "chef-public-ingress"
-  description = "Security group that allows public ingress to instances, HTTP, HTTPS and more."
+  description = "Security group that allows public ingress to instances over HTTP and HTTPS."
   vpc_id      = "${aws_vpc.chef.id}"
 
   # HTTP
@@ -53,8 +52,7 @@ resource "aws_security_group" "chef-public-ingress" {
   }
 }
 
-# This security group allows public egress from the instances for HTTP and
-# HTTPS, which is needed for yum updates, git access etc etc.
+# Allows public egress from the instances for HTTP and HTTPS for yum updates and git access.
 resource "aws_security_group" "chef-public-egress" {
   name        = "chef-public-egress"
   description = "Security group that allows egress to the internet for instances over HTTP and HTTPS."

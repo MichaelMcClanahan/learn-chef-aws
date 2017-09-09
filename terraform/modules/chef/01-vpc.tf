@@ -48,8 +48,7 @@ resource "aws_route_table" "public" {
   }
 }
 
-# Now associate the route table with the public subnet - giving
-# all public subnet instances access to the internet.
+# Associate the route table with the public subnet allowing access to internet.
 resource "aws_route_table_association" "public-subnet" {
   subnet_id      = "${aws_subnet.public-subnet.id}"
   route_table_id = "${aws_route_table.public.id}"

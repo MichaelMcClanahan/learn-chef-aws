@@ -79,7 +79,6 @@ resource "aws_instance" "chef-workstation" {
 
   vpc_security_group_ids = [
     "${aws_security_group.chef-vpc.id}",
-    "${aws_security_group.chef-public-ingress.id}",
     "${aws_security_group.chef-public-egress.id}",
     "${aws_security_group.chef-ssh.id}",
   ]
@@ -102,7 +101,6 @@ resource "aws_instance" "chef-node" {
 
   vpc_security_group_ids = [
     "${aws_security_group.chef-vpc.id}",
-    "${aws_security_group.chef-public-ingress.id}",
     "${aws_security_group.chef-public-egress.id}",
     "${aws_security_group.chef-ssh.id}",
   ]
