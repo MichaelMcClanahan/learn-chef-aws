@@ -53,18 +53,18 @@ If you would like to make it so that you can just ssh directly into any of the C
 Host bastion
  User ec2-user
  Hostname <ADD_BASTION_FQDN_HERE>
- IdentityFile /Users/$USER/.ssh/id_rsa
+ IdentityFile ~/.ssh/id_rsa
  LogLevel Quiet
 
 Host *.compute.internal
  User ec2-user
- IdentityFile /Users/$USER/.ssh/id_rsa
+ IdentityFile ~/.ssh/id_rsa
  ProxyCommand ssh bastion -W %h:%p
  StrictHostKeyChecking no
 
 Host *.compute.amazonaws.com
  User ec2-user
- IdentityFile /Users/$USER/.ssh/id_rsa
+ IdentityFile ~/.ssh/id_rsa
  ProxyCommand ssh bastion -W %h:%p
  StrictHostKeyChecking no
 
