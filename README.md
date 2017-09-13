@@ -45,6 +45,37 @@ Example login:
 ssh -A ec2-user@<PUBLIC_IPADDRESS>
 ```
 
+### Pro-tip
+
+If you would like to make it so that you can just ssh directly into any of the Chef hosts from your local machine, set your `.ssh/config` to route traffic through the bastion like so:
+
+```
+Host bastion
+ User ec2-user
+ Hostname <ADD_BASTION_FQDN_HERE>
+ IdentityFile /Users/$USER/.ssh/id_rsa
+ LogLevel Quiet
+
+Host *.compute.internal
+ User ec2-user
+ IdentityFile /Users/$USER/.ssh/id_rsa
+ ProxyCommand ssh bastion -W %h:%p
+ StrictHostKeyChecking no
+
+Host *.compute.amazonaws.com
+ User ec2-user
+ IdentityFile /Users/$USER/.ssh/id_rsa
+ ProxyCommand ssh bastion -W %h:%p
+ StrictHostKeyChecking no
+
+Host *
+ AddKeysToAgent yes
+ UseKeychain yes
+ IdentityFile ~/.ssh/id_rsa
+```
+
+This will also allow you to SSH/SCP between nodes directly.
+
 ## License
 
 MIT. See LICENSE for details.
