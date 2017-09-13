@@ -58,11 +58,8 @@ resource "aws_instance" "chef-server" {
     "${aws_security_group.chef-vpc.id}",
     "${aws_security_group.chef-public-ingress.id}",
     "${aws_security_group.chef-public-egress.id}",
-    "${aws_security_group.chef-ssh.id}",
   ]
-  root_block_device {
-    volume_size = 40
-  }
+
   tags {
     Name    = "Chef Server"
     Project = "learn_chef"
@@ -80,11 +77,8 @@ resource "aws_instance" "chef-workstation" {
   vpc_security_group_ids = [
     "${aws_security_group.chef-vpc.id}",
     "${aws_security_group.chef-public-egress.id}",
-    "${aws_security_group.chef-ssh.id}",
   ]
-  root_block_device {
-    volume_size = 40
-  }
+
   tags {
     Name    = "Chef Workstation"
     Project = "learn_chef"
@@ -102,14 +96,30 @@ resource "aws_instance" "chef-node" {
   vpc_security_group_ids = [
     "${aws_security_group.chef-vpc.id}",
     "${aws_security_group.chef-public-egress.id}",
-    "${aws_security_group.chef-ssh.id}",
   ]
-  root_block_device {
-    volume_size = 40
-  }
+
   tags {
     Name    = "Chef Node ${format(count.index + 1)}"
     Project = "learn_chef"
   }
   count = "${var.node_count}"
+}
+
+# Create Chef Bastion
+resource "aws_instance" "chef-bastion" {
+  ami           = "${data.aws_ami.rhel7_3.id}"
+  instance_type = "t2.micro"
+  subnet_id     = "${aws_subnet.public-subnet.id}"
+  key_name      = "${aws_key_pair.keypair.key_name}"
+
+  vpc_security_group_ids = [
+    "${aws_security_group.chef-vpc.id}",
+    "${aws_security_group.chef-ssh.id}",
+    "${aws_security_group.chef-public-egress.id}",
+  ]
+
+  tags {
+    Name    = "Chef Bastion"
+    Project = "learn_chef"
+  }
 }

@@ -22,3 +22,11 @@ output "chef-node_public_dns" {
 output "chef-node_public_ip" {
   value = "${aws_instance.chef-node.*.public_ip}"
 }
+
+output "chef-bastion_public_dns" {
+  value = "${aws_instance.chef-bastion.*.public_dns}"
+}
+
+output "chef-bastion_public_ip" {
+  value = "${aws_instance.chef-bastion.*.public_ip}"
+}

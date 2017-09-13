@@ -22,3 +22,11 @@ output "chef-node_public_dns" {
 output "chef-node_public_ip" {
   value = "${module.chef.chef-node_public_ip}"
 }
+
+output "chef-bastion_public_dns" {
+  value = "${module.chef.chef-bastion_public_dns}"
+}
+
+output "chef-bastion_public_ip" {
+  value = "${module.chef.chef-bastion_public_ip}"
+}

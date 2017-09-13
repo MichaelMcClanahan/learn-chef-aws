@@ -47,12 +47,12 @@ resource "aws_security_group" "chef-public-ingress" {
   }
 
   tags {
-    Name    = "Chef Public Access"
+    Name    = "Chef Public Ingress"
     Project = "learn_chef"
   }
 }
 
-# Allows public egress from the instances for HTTP and HTTPS for yum updates and git access.
+# Allows public egress from the instances over HTTP and HTTPS for yum updates, git access, etc.
 resource "aws_security_group" "chef-public-egress" {
   name        = "chef-public-egress"
   description = "Security group that allows egress to the internet for instances over HTTP and HTTPS."
@@ -75,7 +75,7 @@ resource "aws_security_group" "chef-public-egress" {
   }
 
   tags {
-    Name    = "Chef Public Access"
+    Name    = "Chef Public Egress"
     Project = "learn_chef"
   }
 }

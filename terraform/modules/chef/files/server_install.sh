@@ -38,8 +38,8 @@ if [ ! $(which chef-server-ctl) ]; then
   while (curl http://localhost:8000/_status) | grep "fail"; do sleep 15s; done
 
   echo "Creating initial user and organization..."
-  chef-server-ctl user-create chefadmin Chef Admin admin@4thcoffee.com insecurepassword --filename /drop/chefadmin.pem
-  chef-server-ctl org-create 4thcoffee "Fourth Coffee, Inc." --association_user chefadmin --filename 4thcoffee-validator.pem
+  chef-server-ctl user-create chefadmin Chef Admin admin@learnchefaws.com useterraformtolearnchefinaws --filename /drop/chefadmin.pem
+  chef-server-ctl org-create learnchefaws "Learn Chef AWS" --association_user chefadmin --filename learnchefaws-validator.pem
 
   # echo "Installing Management Console..."
   # chef-server-ctl install chef-manage

@@ -25,14 +25,28 @@ terraform apply
 
 ## Login
 
-This will use `~/.ssh/id_rsa.pub` as your public key. The exact IP addresses to use will be output at the end of the Terraform run.
+The exact IP addresses to use will be output at the end of the Terraform run. To access the EC2 instances, you will need to [authenticate using PKI]. By default, this will use `~/.ssh/id_rsa.pub` as your public key.
+
+If you do not have an RSA key generated you can do the following:
+
+```
+ssh-keygen -t rsa
+```
+
+Make sure you have your local identity added:
+
+```
+ssh-add -K ~/.ssh/id_rsa
+```
 
 Example login:
 
 ```
-ssh -i ~/.ssh/id_rsa.pub ec2-user@<PUBLIC_IPADDRESS>
+ssh -A ec2-user@<PUBLIC_IPADDRESS>
 ```
 
 ## License
 
 MIT. See LICENSE for details.
+
+[authenticate using PKI]:https://aws.amazon.com/blogs/security/securely-connect-to-linux-instances-running-in-a-private-amazon-vpc/
