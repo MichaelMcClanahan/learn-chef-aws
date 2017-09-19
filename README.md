@@ -8,6 +8,7 @@ Using Terraform, this will set up a Chef environment in the us-east-2 AWS region
 - 1 Chef Server
 - 1 Chef Workstation
 - 2 Chef Nodes
+- 1 Bastion for ssh purposes
 
 This will allow you to easily complete the Tracks on https://learn.chef.io/
 
@@ -42,7 +43,7 @@ ssh-add -K ~/.ssh/id_rsa
 Example login:
 
 ```
-ssh -A ec2-user@<PUBLIC_IPADDRESS>
+ssh -A <HOSTNAME>
 ```
 
 ### Pro-tip
