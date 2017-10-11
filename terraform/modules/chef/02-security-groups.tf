@@ -1,6 +1,6 @@
 # Allows intra-node communication on all ports with all protocols.
-resource "aws_security_group" "chef-vpc" {
-  name        = "chef-vpc"
+resource "aws_security_group" "chef_vpc" {
+  name        = "chef_vpc"
   description = "Default security group that allows all instances in the VPC to talk to each other over any port and protocol."
   vpc_id      = "${aws_vpc.chef.id}"
 
@@ -25,8 +25,8 @@ resource "aws_security_group" "chef-vpc" {
 }
 
 # Allows public ingress to the instances for HTTP and HTTPS.
-resource "aws_security_group" "chef-public-ingress" {
-  name        = "chef-public-ingress"
+resource "aws_security_group" "chef_public_ingress" {
+  name        = "chef_public_ingress"
   description = "Security group that allows public ingress to instances over HTTP and HTTPS."
   vpc_id      = "${aws_vpc.chef.id}"
 
@@ -53,8 +53,8 @@ resource "aws_security_group" "chef-public-ingress" {
 }
 
 # Allows public egress from the instances over HTTP and HTTPS for yum updates, git access, etc.
-resource "aws_security_group" "chef-public-egress" {
-  name        = "chef-public-egress"
+resource "aws_security_group" "chef_public_egress" {
+  name        = "chef_public_egress"
   description = "Security group that allows egress to the internet for instances over HTTP and HTTPS."
   vpc_id      = "${aws_vpc.chef.id}"
 
@@ -81,8 +81,8 @@ resource "aws_security_group" "chef-public-egress" {
 }
 
 # Security group which allows SSH access to a host.
-resource "aws_security_group" "chef-ssh" {
-  name        = "chef-ssh"
+resource "aws_security_group" "chef_ssh" {
+  name        = "chef_ssh"
   description = "Security group that allows public ingress over SSH."
   vpc_id      = "${aws_vpc.chef.id}"
 

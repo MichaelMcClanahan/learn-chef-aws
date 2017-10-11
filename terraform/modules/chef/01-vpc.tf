@@ -20,7 +20,7 @@ resource "aws_internet_gateway" "chef" {
 }
 
 # Create a public subnet.
-resource "aws_subnet" "public-subnet" {
+resource "aws_subnet" "public_subnet" {
   vpc_id                  = "${aws_vpc.chef.id}"
   cidr_block              = "${var.subnet_cidr}"
   availability_zone       = "${var.subnet_az}"
@@ -49,7 +49,7 @@ resource "aws_route_table" "public" {
 }
 
 # Associate the route table with the public subnet allowing access to internet.
-resource "aws_route_table_association" "public-subnet" {
-  subnet_id      = "${aws_subnet.public-subnet.id}"
+resource "aws_route_table_association" "public_subnet" {
+  subnet_id      = "${aws_subnet.public_subnet.id}"
   route_table_id = "${aws_route_table.public.id}"
 }

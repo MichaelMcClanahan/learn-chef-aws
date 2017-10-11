@@ -2,7 +2,7 @@
 data "aws_ami" "rhel7_3" {
   most_recent = true
 
-  owners = ["309956199498"] # Red Hat's account ID.
+  owners = ["309956199498"]
 
   filter {
     name   = "architecture"
@@ -31,138 +31,146 @@ resource "aws_key_pair" "keypair" {
   public_key = "${file(var.public_key_path)}"
 }
 
-# # Load the script to prepare the Chef server
-# data "template_file" "server_install" {
-#   template = "${file("${path.module}/files/server_install.sh")}"
-
-#   vars = {
-#     workstation_public_dns  = "${aws_instance.chef-workstation.public_dns}"
-#   }
-# }
-
-# # Load the script to prepare the Chef workstation
-# data "template_file" "workstation_install" {
-#   template = "${file("${path.module}/files/workstation_install.sh")}"
-
-#   vars = {
-#     server_public_dns  = "${aws_instance.chef-server.public_dns}"
-#   }
-# }
-
-# # Load the script to prepare the Chef node(s)
-# data "template_file" "node_install" {
-#   template = "${file("${path.module}/files/node_install.sh")}"
-# }
-
 # Create Chef Server
-resource "aws_instance" "chef-server" {
+resource "aws_instance" "chef_server" {
   ami           = "${data.aws_ami.rhel7_3.id}"
-  instance_type = "${var.ami_size}"
-  subnet_id     = "${aws_subnet.public-subnet.id}"
+  instance_type = "t2.medium"
+  subnet_id     = "${aws_subnet.public_subnet.id}"
   key_name      = "${aws_key_pair.keypair.key_name}"
 
-  # user_data     = "${data.template_file.server_install.rendered}"
-
   vpc_security_group_ids = [
-    "${aws_security_group.chef-vpc.id}",
-    "${aws_security_group.chef-public-ingress.id}",
-    "${aws_security_group.chef-public-egress.id}",
+    "${aws_security_group.chef_vpc.id}",
+    "${aws_security_group.chef_public_ingress.id}",
+    "${aws_security_group.chef_public_egress.id}",
   ]
+
   tags {
     Name    = "Chef Server"
     Project = "learn_chef"
   }
 
-  # provisioner "remote-exec" {
-  #   script = "${path.module}/files/server_install.sh"
+  # connection {
+  #   host                = "${self.private_ip}"
+  #   user                = "ec2-user"
+  #   private_key         = "${file("~/.ssh/id_rsa")}"
+  #   bastion_host        = "${aws_instance.chef_bastion.public_dns}"
+  #   bastion_user        = "ec2-user"
+  #   bastion_private_key = "${file("~/.ssh/id_rsa")}"
+  # }
 
-  #   connection {
-  #     host                = "${aws_instance.chef-server.private_ip}"
-  #     user                = "ec2-user"
-  #     private_key         = "${file("~/.ssh/id_rsa")}"
-  #     bastion_host        = "${aws_instance.chef-bastion.public_dns}"
-  #     bastion_user        = "ec2-user"
-  #     bastion_private_key = "${file("~/.ssh/id_rsa")}"
-  #   }
+  # provisioner "file" {
+  #   source      = "${path.module}/files/server_install.sh"
+  #   destination = "/tmp/server_install.sh"
+  # }
+
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "chmod +x /tmp/server_install.sh",
+  #     "sudo /tmp/server_install.sh",
+  #   ]
   # }
 }
 
+# Load the script for the workstation install
+data "template_file" "workstation_install" {
+  template = "${file("${path.module}/files/workstation_install.sh")}"
+
+  vars {
+    chef_server = "${aws_instance.chef_server.public_dns}"
+  }
+}
+
 # Create Chef Workstation
-resource "aws_instance" "chef-workstation" {
+resource "aws_instance" "chef_workstation" {
   ami           = "${data.aws_ami.rhel7_3.id}"
   instance_type = "${var.ami_size}"
-  subnet_id     = "${aws_subnet.public-subnet.id}"
+  subnet_id     = "${aws_subnet.public_subnet.id}"
   key_name      = "${aws_key_pair.keypair.key_name}"
-
-  # user_data     = "${data.template_file.workstation_install.rendered}"
+  user_data     = "${data.template_file.workstation_install.rendered}"
 
   vpc_security_group_ids = [
-    "${aws_security_group.chef-vpc.id}",
-    "${aws_security_group.chef-public-egress.id}",
+    "${aws_security_group.chef_vpc.id}",
+    "${aws_security_group.chef_public_egress.id}",
   ]
+
   tags {
     Name    = "Chef Workstation"
     Project = "learn_chef"
   }
 
-  # provisioner "remote-exec" {
-  #   script = "${path.module}/files/workstation_install.sh"
+  # connection {
+  #   host                = "${self.private_ip}"
+  #   user                = "ec2-user"
+  #   private_key         = "${file("~/.ssh/id_rsa")}"
+  #   bastion_host        = "${aws_instance.chef_bastion.public_dns}"
+  #   bastion_user        = "ec2-user"
+  #   bastion_private_key = "${file("~/.ssh/id_rsa")}"
+  # }
 
-  #   connection {
-  #     host                = "${aws_instance.chef-workstation.private_ip}"
-  #     user                = "ec2-user"
-  #     private_key         = "${file("~/.ssh/id_rsa")}"
-  #     bastion_host        = "${aws_instance.chef-bastion.public_dns}"
-  #     bastion_user        = "ec2-user"
-  #     bastion_private_key = "${file("~/.ssh/id_rsa")}"
-  #   }
+  # provisioner "file" {
+  #   source      = "${path.module}/files/workstation_install.sh"
+  #   destination = "/tmp/workstation_install.sh"
+  # }
+
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "chmod +x /tmp/workstation_install.sh",
+  #     "sudo /tmp/workstation_install.sh",
+  #   ]
   # }
 }
 
 # Create Chef Node(s)
-resource "aws_instance" "chef-node" {
+resource "aws_instance" "chef_node" {
   ami           = "${data.aws_ami.rhel7_3.id}"
   instance_type = "${var.ami_size}"
-  subnet_id     = "${aws_subnet.public-subnet.id}"
+  subnet_id     = "${aws_subnet.public_subnet.id}"
   key_name      = "${aws_key_pair.keypair.key_name}"
-
-  # user_data     = "${data.template_file.node_install.rendered}"
+  count         = "${var.node_count}"
 
   vpc_security_group_ids = [
-    "${aws_security_group.chef-vpc.id}",
-    "${aws_security_group.chef-public-egress.id}",
+    "${aws_security_group.chef_vpc.id}",
+    "${aws_security_group.chef_public_egress.id}",
   ]
+
   tags {
     Name    = "Chef Node ${format(count.index + 1)}"
     Project = "learn_chef"
   }
-  count = "${var.node_count}"
 
-  provisioner "remote-exec" {
-    script = "${path.module}/files/node_install.sh"
-
-    connection {
-      host                = "${self.private_ip}"
-      user                = "ec2-user"
-      private_key         = "${file("~/.ssh/id_rsa")}"
-      bastion_host        = "${aws_instance.chef-bastion.public_dns}"
-      bastion_user        = "ec2-user"
-      bastion_private_key = "${file("~/.ssh/id_rsa")}"
-    }
+  connection {
+    host                = "${self.private_ip}"
+    user                = "ec2-user"
+    private_key         = "${file("~/.ssh/id_rsa")}"
+    bastion_host        = "${aws_instance.chef_bastion.public_dns}"
+    bastion_user        = "ec2-user"
+    bastion_private_key = "${file("~/.ssh/id_rsa")}"
   }
+
+  # provisioner "file" {
+  #   source      = "${path.module}/files/node_install.sh"
+  #   destination = "/tmp/node_install.sh"
+  # }
+
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "chmod +x /tmp/node_install.sh",
+  #     "sudo /tmp/node_install.sh",
+  #   ]
+  # }
 }
 
 # Create Chef Bastion
-resource "aws_instance" "chef-bastion" {
+resource "aws_instance" "chef_bastion" {
   ami           = "${data.aws_ami.rhel7_3.id}"
   instance_type = "t2.micro"
-  subnet_id     = "${aws_subnet.public-subnet.id}"
+  subnet_id     = "${aws_subnet.public_subnet.id}"
   key_name      = "${aws_key_pair.keypair.key_name}"
 
   vpc_security_group_ids = [
-    "${aws_security_group.chef-vpc.id}",
-    "${aws_security_group.chef-ssh.id}",
-    "${aws_security_group.chef-public-egress.id}",
+    "${aws_security_group.chef_vpc.id}",
+    "${aws_security_group.chef_ssh.id}",
+    "${aws_security_group.chef_public_egress.id}",
   ]
 
   tags {

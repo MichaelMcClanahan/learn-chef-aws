@@ -4,8 +4,8 @@ variable "region" {
 }
 
 variable "ami_size" {
-  description = "Size of the Chef EC2 Instances"
-  default     = "t2.medium"
+  description = "Size of the Chef Workstation and Node EC2 Instances"
+  default     = "t2.small"
 }
 
 variable "key_name" {

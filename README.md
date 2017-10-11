@@ -1,7 +1,3 @@
-# Work in Progress
-
-This is a work in progress and should be used at your own risk!
-
 # learn-chef-aws
 
 Using Terraform, this will set up a Chef environment in the us-east-2 AWS region containing:
@@ -13,6 +9,8 @@ Using Terraform, this will set up a Chef environment in the us-east-2 AWS region
 This will allow you to easily complete the Tracks on https://learn.chef.io/
 
 ## Usage
+
+This assumes you have your [AWS configuration and credentials set up appropriately] already.
 
 Within the Terraform directory:
 
@@ -75,10 +73,9 @@ Host *
  IdentityFile ~/.ssh/id_rsa
 ```
 
-This will also allow you to SSH/SCP between nodes directly.
-
 ## License
 
 MIT. See LICENSE for details.
 
 [authenticate using PKI]:https://aws.amazon.com/blogs/security/securely-connect-to-linux-instances-running-in-a-private-amazon-vpc/
+[AWS configuration and credentials set up appropriately]: http://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html

@@ -5,7 +5,7 @@ variable "region" {
 }
 
 variable "ami_size" {
-  description = "Size of the Chef EC2 Instances"
+  description = "Size of the Chef Workstation and Node EC2 Instances"
 
   # Passed in via module call in main.tf
 }
