@@ -38,9 +38,6 @@ if [ ! $(which chef-server-ctl) ]; then
   chef-server-ctl user-create chefadmin Chef Admin admin@learnchefaws.com useterraformtolearnchefinaws --filename /drop/chefadmin.pem
   chef-server-ctl org-create learnchefaws "Learn Chef AWS" --association_user chefadmin --filename learnchefaws-validator.pem
 
-  echo "Copying RSA private key to workstation"
-  scp -v /drop/chefadmin.pem ${aws_instance.chef-workstation.public_dns}:/home/ec2-user/chef-repo/.chef/chefadmin.pem
-
   # echo "Installing Management Console..."
   # chef-server-ctl install chef-manage
   # chef-server-ctl reconfigure

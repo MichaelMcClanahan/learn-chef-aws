@@ -1,4 +1,4 @@
-# Define RHEL 7.3 AMI
+# Define RHEL 7.3 AMI.
 data "aws_ami" "rhel7_3" {
   most_recent = true
 
@@ -25,13 +25,13 @@ data "aws_ami" "rhel7_3" {
   }
 }
 
-# Create SSH Key Pair
+# Create SSH Key Pair.
 resource "aws_key_pair" "keypair" {
   key_name   = "${var.key_name}"
   public_key = "${file(var.public_key_path)}"
 }
 
-# Create Chef Server
+# Create Chef Server.
 resource "aws_instance" "chef_server" {
   ami           = "${data.aws_ami.rhel7_3.id}"
   instance_type = "t2.medium"
@@ -49,29 +49,31 @@ resource "aws_instance" "chef_server" {
     Project = "learn_chef"
   }
 
-  # connection {
-  #   host                = "${self.private_ip}"
-  #   user                = "ec2-user"
-  #   private_key         = "${file("~/.ssh/id_rsa")}"
-  #   bastion_host        = "${aws_instance.chef_bastion.public_dns}"
-  #   bastion_user        = "ec2-user"
-  #   bastion_private_key = "${file("~/.ssh/id_rsa")}"
-  # }
+  connection {
+    host                = "${self.private_ip}"
+    user                = "ec2-user"
+    private_key         = "${file("~/.ssh/id_rsa")}"
+    bastion_host        = "${aws_instance.chef_bastion.public_dns}"
+    bastion_user        = "ec2-user"
+    bastion_private_key = "${file("~/.ssh/id_rsa")}"
+  }
 
-  # provisioner "file" {
-  #   source      = "${path.module}/files/server_install.sh"
-  #   destination = "/tmp/server_install.sh"
-  # }
+  provisioner "file" {
+    source      = "${path.module}/files/server_install.sh"
+    destination = "/tmp/server_install.sh"
+  }
 
-  # provisioner "remote-exec" {
-  #   inline = [
-  #     "chmod +x /tmp/server_install.sh",
-  #     "sudo /tmp/server_install.sh",
-  #   ]
-  # }
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/server_install.sh",
+      "sudo /tmp/server_install.sh",
+    ]
+  }
 }
 
-# Load the script for the workstation install
+# Load the script for the workstation install.
+#   We do this because the workstation_install.sh script needs to
+#   interpolate the value of the chef_server public DNS.
 data "template_file" "workstation_install" {
   template = "${file("${path.module}/files/workstation_install.sh")}"
 
@@ -86,7 +88,6 @@ resource "aws_instance" "chef_workstation" {
   instance_type = "${var.ami_size}"
   subnet_id     = "${aws_subnet.public_subnet.id}"
   key_name      = "${aws_key_pair.keypair.key_name}"
-  user_data     = "${data.template_file.workstation_install.rendered}"
 
   vpc_security_group_ids = [
     "${aws_security_group.chef_vpc.id}",
@@ -98,29 +99,51 @@ resource "aws_instance" "chef_workstation" {
     Project = "learn_chef"
   }
 
-  # connection {
-  #   host                = "${self.private_ip}"
-  #   user                = "ec2-user"
-  #   private_key         = "${file("~/.ssh/id_rsa")}"
-  #   bastion_host        = "${aws_instance.chef_bastion.public_dns}"
-  #   bastion_user        = "ec2-user"
-  #   bastion_private_key = "${file("~/.ssh/id_rsa")}"
-  # }
+  connection {
+    host                = "${self.private_ip}"
+    user                = "ec2-user"
+    private_key         = "${file("~/.ssh/id_rsa")}"
+    bastion_host        = "${aws_instance.chef_bastion.public_dns}"
+    bastion_user        = "ec2-user"
+    bastion_private_key = "${file("~/.ssh/id_rsa")}"
+  }
 
-  # provisioner "file" {
-  #   source      = "${path.module}/files/workstation_install.sh"
-  #   destination = "/tmp/workstation_install.sh"
-  # }
-
-  # provisioner "remote-exec" {
-  #   inline = [
-  #     "chmod +x /tmp/workstation_install.sh",
-  #     "sudo /tmp/workstation_install.sh",
-  #   ]
-  # }
+  provisioner "remote-exec" {
+    inline = [
+      "${data.template_file.workstation_install.rendered}",
+    ]
+  }
 }
 
-# Create Chef Node(s)
+# Null resource to copy keys from chef_server to chef_workstation.
+#   Will not run until chef_server and chef_workstation have completed.
+resource "null_resource" "copy_key" {
+  depends_on = ["aws_instance.chef_server", "aws_instance.chef_workstation"]
+
+  connection {
+    host                = "${aws_instance.chef_server.private_ip}"
+    user                = "ec2-user"
+    private_key         = "${file("~/.ssh/id_rsa")}"
+    bastion_host        = "${aws_instance.chef_bastion.public_dns}"
+    bastion_user        = "ec2-user"
+    bastion_private_key = "${file("~/.ssh/id_rsa")}"
+  }
+
+  provisioner "file" {
+    content     = "${file("~/.ssh/id_rsa")}"
+    destination = "/tmp/id_rsa"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod 400 /tmp/id_rsa",
+      "scp -v /drop/chefadmin.pem -i /tmp/id_rsa -o StrictHostKeyChecking=no ${aws_instance.chef_workstation.public_dns}:/home/ec2-user/chef-repo/.chef/chefadmin.pem",
+      "rm -f /tmp/id_rsa"
+    ]
+  }
+}
+
+# Create Chef Node(s).
 resource "aws_instance" "chef_node" {
   ami           = "${data.aws_ami.rhel7_3.id}"
   instance_type = "${var.ami_size}"
@@ -147,20 +170,20 @@ resource "aws_instance" "chef_node" {
     bastion_private_key = "${file("~/.ssh/id_rsa")}"
   }
 
-  # provisioner "file" {
-  #   source      = "${path.module}/files/node_install.sh"
-  #   destination = "/tmp/node_install.sh"
-  # }
+  provisioner "file" {
+    source      = "${path.module}/files/node_install.sh"
+    destination = "/tmp/node_install.sh"
+  }
 
-  # provisioner "remote-exec" {
-  #   inline = [
-  #     "chmod +x /tmp/node_install.sh",
-  #     "sudo /tmp/node_install.sh",
-  #   ]
-  # }
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/node_install.sh",
+      "sudo /tmp/node_install.sh",
+    ]
+  }
 }
 
-# Create Chef Bastion
+# Create Chef Bastion.
 resource "aws_instance" "chef_bastion" {
   ami           = "${data.aws_ami.rhel7_3.id}"
   instance_type = "t2.micro"
