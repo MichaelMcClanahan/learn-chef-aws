@@ -138,7 +138,7 @@ resource "null_resource" "copy_key" {
     inline = [
       "chmod 400 /tmp/id_rsa",
       "scp -i /tmp/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /drop/chefadmin.pem ${aws_instance.chef_workstation.public_dns}:/home/ec2-user/chef-repo/.chef/chefadmin.pem",
-      "rm -f /tmp/id_rsa"
+      "rm -f /tmp/id_rsa",
     ]
   }
 }
