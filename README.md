@@ -29,7 +29,7 @@ The exact IP addresses to use will be output at the end of the Terraform run. To
 If you do not have an RSA key generated you can do the following:
 
 ```
-ssh-keygen -t rsa
+ssh-keygen -t rsa -b 4096
 ```
 
 Make sure you have your local identity added:

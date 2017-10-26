@@ -17,7 +17,7 @@ curl https://omnitruck.chef.io/install.sh | sudo bash -s -- -P chefdk -c stable 
 echo 'eval "$(chef shell-init bash)"' >> ~/.bash_profile
 
 # Make Chef Repo
-mkdir /home/ec2-user/chef-repo/ /home/ec2-user/chef-repo/.chef/
+mkdir /home/ec2-user/chef-repo/ /home/ec2-user/chef-repo/.chef/ /home/ec2-user/chef-repo/cookbooks/
 
 cat << 'EOF' > /home/ec2-user/chef-repo/.chef/knife.rb
 current_dir = File.dirname(__FILE__)
